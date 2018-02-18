@@ -130,15 +130,16 @@ else:
     if not jdk_home or not exists(jdk_home):
         raise Exception('Unable to determine JDK_HOME')
 
-    jre_home = None
-    if exists(join(jdk_home, 'jre')):
-        jre_home = join(jdk_home, 'jre')
-    if not jre_home:
-        jre_home = subprocess.Popen(
-            'readlink -f `which java` | sed "s:bin/java::"',
-            shell=True, stdout=subprocess.PIPE).communicate()[0].strip()
-    if not jre_home:
-        raise Exception('Unable to determine JRE_HOME')
+    jre_home = getenv('JRE_HOME')
+    if jre_home is None:
+        if exists(join(jdk_home, 'jre')):
+            jre_home = join(jdk_home, 'jre')
+        if not jre_home:
+            jre_home = subprocess.Popen(
+                'readlink -f `which java` | sed "s:bin/java::"',
+                shell=True, stdout=subprocess.PIPE).communicate()[0].strip()
+        if not jre_home:
+            raise Exception('Unable to determine JRE_HOME')
 
     # This dictionary converts values from platform.machine() to a "cpu" string.
     # It is needed to set the correct lib path, found in the jre_home, eg.
